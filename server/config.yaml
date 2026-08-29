@@ -1,0 +1,6 @@
+control_port: 48321
+video_port_range: [49152, 49200]
+default_resolution: "1920x1080"
+default_fps: 60
+default_bitrate: 8000
+server_name: null  # auto-detect hostname if null
