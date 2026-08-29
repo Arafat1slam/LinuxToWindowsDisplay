@@ -55,7 +55,7 @@ async def main() -> None:
         capture_pipeline=capture_pipe,
     )
 
-    discovery.start()
+    await discovery.start()
 
     loop = asyncio.get_running_loop()
     stop_event = asyncio.Event()
@@ -72,7 +72,7 @@ async def main() -> None:
     try:
         await stop_event.wait()
     finally:
-        discovery.stop()
+        await discovery.stop()
         await server.stop()
         display_mgr.remove_virtual_display()
         logger.info("Shutdown complete.")

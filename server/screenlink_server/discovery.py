@@ -4,7 +4,8 @@ import logging
 import socket
 from typing import Optional
 
-from zeroconf import ServiceInfo, Zeroconf
+from zeroconf import ServiceInfo
+from zeroconf.asyncio import AsyncZeroconf
 
 logger = logging.getLogger(__name__)
 
@@ -16,13 +17,13 @@ class DiscoveryResponder:
     def __init__(self, port: int = 48321, name: Optional[str] = None):
         self.port = port
         self.hostname = name or socket.gethostname()
-        self.zeroconf: Optional[Zeroconf] = None
+        self.zeroconf: Optional[AsyncZeroconf] = None
         self.service_info: Optional[ServiceInfo] = None
 
-    def start(self) -> None:
+    async def start(self) -> None:
         """Starts the mDNS advertisement for _screenlink._tcp.local."""
         logger.info(f"Starting mDNS advertisement for ScreenLink on port {self.port}")
-        self.zeroconf = Zeroconf()
+        self.zeroconf = AsyncZeroconf()
 
         properties = {
             b"version": b"0.1.0",
@@ -40,15 +41,15 @@ class DiscoveryResponder:
             server=f"{self.hostname}.local."
         )
 
-        self.zeroconf.register_service(self.service_info)
+        await self.zeroconf.async_register_service(self.service_info)
         logger.info("mDNS advertisement started.")
 
-    def stop(self) -> None:
+    async def stop(self) -> None:
         """Stops the mDNS advertisement."""
         if self.zeroconf and self.service_info:
             logger.info("Stopping mDNS advertisement.")
-            self.zeroconf.unregister_service(self.service_info)
-            self.zeroconf.close()
+            await self.zeroconf.async_unregister_service(self.service_info)
+            await self.zeroconf.async_close()
             self.zeroconf = None
             self.service_info = None
             logger.info("mDNS advertisement stopped.")
