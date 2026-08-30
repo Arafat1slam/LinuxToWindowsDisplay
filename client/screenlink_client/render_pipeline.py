@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Union
 
 import gi
 
@@ -20,8 +21,8 @@ class RenderPipeline:
     """
 
     def __init__(self) -> None:
-        self.pipeline: gi.repository.Gst.Pipeline | None = None
-        self.jitter_buffer: gi.repository.Gst.Element | None = None
+        self.pipeline: Union[gi.repository.Gst.Pipeline, None] = None
+        self.jitter_buffer: Union[gi.repository.Gst.Element, None] = None
         self._is_playing: bool = False
 
     def probe_decoder(self) -> str:

@@ -23,7 +23,7 @@ import logging
 import time
 from dataclasses import asdict, dataclass, field
 from enum import Enum
-from typing import Any
+from typing import Any, Union
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +73,7 @@ class InputEventKind(str, Enum):
 # ---------------------------------------------------------------------------
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class HelloPayload:
     """``HELLO`` payload — sent C→S to open a session (ARCHITECTURE.md §6).
 
@@ -88,7 +88,7 @@ class HelloPayload:
     requested_fps: int
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class HelloAckPayload:
     """``HELLO_ACK`` payload — sent S→C to confirm session params (ARCHITECTURE.md §6).
 
@@ -107,7 +107,7 @@ class HelloAckPayload:
     granted_fps: int
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class ResolutionChangePayload:
     """``RESOLUTION_CHANGE`` payload — sent C→S (ARCHITECTURE.md §6).
 
@@ -120,7 +120,7 @@ class ResolutionChangePayload:
     height: int
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class HeartbeatPayload:
     """``HEARTBEAT`` / ``HEARTBEAT_ACK`` payload (ARCHITECTURE.md §6).
 
@@ -131,7 +131,7 @@ class HeartbeatPayload:
     ts: float = field(default_factory=time.time)
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class DisconnectPayload:
     """``DISCONNECT`` payload (ARCHITECTURE.md §6).
 
@@ -145,7 +145,7 @@ class DisconnectPayload:
 # Input-event sub-payloads (ARCHITECTURE.md §8) --------------------------
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class MouseMovePayload:
     """Absolute mouse-move event with normalised 0.0–1.0 coordinates.
 
@@ -158,7 +158,7 @@ class MouseMovePayload:
     y: float = 0.0
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class MouseButtonPayload:
     """Mouse button press/release event (ARCHITECTURE.md §8).
 
@@ -172,7 +172,7 @@ class MouseButtonPayload:
     action: str = "down"
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class ScrollPayload:
     """Scroll-wheel event (ARCHITECTURE.md §8).
 
@@ -186,7 +186,7 @@ class ScrollPayload:
     delta_y: int = 0
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class KeyPayload:
     """Keyboard key press/release event (ARCHITECTURE.md §8).
 
@@ -201,7 +201,7 @@ class KeyPayload:
 
 
 # Union-style alias for type annotations.
-InputPayload = MouseMovePayload | MouseButtonPayload | ScrollPayload | KeyPayload
+InputPayload = Union[MouseMovePayload, MouseButtonPayload, ScrollPayload, KeyPayload]
 
 # ---------------------------------------------------------------------------
 # Envelope
@@ -223,7 +223,7 @@ def reset_seq() -> None:
     _SEQ_COUNTER = 0
 
 
-@dataclass(slots=True)
+@dataclass()
 class Message:
     """A single control-channel message envelope (ARCHITECTURE.md §6).
 
@@ -234,7 +234,7 @@ class Message:
     """
 
     type: MessageType
-    payload: dict[str, Any] | Any = field(default_factory=dict)
+    payload: Union[dict[str, Any], Any] = field(default_factory=dict)
     seq: int = field(default_factory=_next_seq)
 
 
@@ -266,7 +266,7 @@ def serialize(msg: Message) -> bytes:
     return json.dumps(envelope, separators=(",", ":")).encode("utf-8") + b"\n"
 
 
-def deserialize(data: bytes | str) -> Message:
+def deserialize(data: Union[bytes, str]) -> Message:
     """Parse raw wire bytes into a ``Message``.
 
     Raises:
@@ -355,7 +355,7 @@ def make_heartbeat() -> Message:
     return Message(type=MessageType.HEARTBEAT, payload=HeartbeatPayload())
 
 
-def make_heartbeat_ack(ts: float | None = None) -> Message:
+def make_heartbeat_ack(ts: Union[float, None] = None) -> Message:
     """Build a ``HEARTBEAT_ACK`` message per ARCHITECTURE.md §6."""
     return Message(
         type=MessageType.HEARTBEAT_ACK,

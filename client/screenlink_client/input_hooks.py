@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Union, Dict, Optional
 
 try:
     from pynput import keyboard, mouse
@@ -100,7 +100,7 @@ class InputHooks:
             "delta_y": int(dy)
         })
 
-    def _map_key(self, key: keyboard.Key | keyboard.KeyCode) -> str:
+    def _map_key(self, key: Union[keyboard.Key, keyboard.KeyCode]) -> str:
         """Maps pynput key to evdev key name."""
         if hasattr(key, 'char') and key.char:
             char = key.char.upper()
@@ -126,7 +126,7 @@ class InputHooks:
         }
         return key_map.get(key, "KEY_UNKNOWN")
 
-    def _on_key_press(self, key: keyboard.Key | keyboard.KeyCode) -> None:
+    def _on_key_press(self, key: Union[keyboard.Key, keyboard.KeyCode]) -> None:
         evdev_key = self._map_key(key)
         self.on_input_event({
             "kind": "key",
@@ -134,7 +134,7 @@ class InputHooks:
             "action": "down"
         })
 
-    def _on_key_release(self, key: keyboard.Key | keyboard.KeyCode) -> None:
+    def _on_key_release(self, key: Union[keyboard.Key, keyboard.KeyCode]) -> None:
         evdev_key = self._map_key(key)
         self.on_input_event({
             "kind": "key",
