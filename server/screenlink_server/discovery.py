@@ -32,10 +32,19 @@ class DiscoveryResponder:
             b"max_res": b"3840x2160"
         }
 
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            s.connect(("8.8.8.8", 80))
+            local_ip = s.getsockname()[0]
+        except Exception:
+            local_ip = "127.0.0.1"
+        finally:
+            s.close()
+
         self.service_info = ServiceInfo(
             "_screenlink._tcp.local.",
             f"{self.hostname}._screenlink._tcp.local.",
-            addresses=[socket.inet_aton("0.0.0.0")],
+            addresses=[socket.inet_aton(local_ip)],
             port=self.port,
             properties=properties,
             server=f"{self.hostname}.local."
