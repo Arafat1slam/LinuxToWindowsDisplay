@@ -63,6 +63,8 @@ class DiscoveryBrowser:
             if info:
                 addresses = [str(addr) for addr in info.parsed_addresses()]
                 address = addresses[0] if addresses else "127.0.0.1"
+                if address == "0.0.0.0":
+                    address = info.server.rstrip('.') if info.server else "127.0.0.1"
                 port = info.port or 48321
                 properties = {}
                 if info.properties:
